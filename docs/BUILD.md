@@ -9,9 +9,12 @@
   dkp-pacman -S switch-dev switch-mesa switch-glfw switch-sdl2
   ```
   (`switch-deko3d`, necessário só a partir da Fase 4.)
-- Nesta máquina já existe `C:\devkitPro` + `C:\devkitA64` (gcc 15.2
-  aarch64). Falta configurar o `dkp-pacman`/repositórios devkitPro e
-  instalar os pacotes acima — ver `scripts/windows-setup.bat`.
+- Nesta máquina (18/09/2026, verificado): `C:\devkitPro` + `C:\devkitA64`
+  (gcc 16.1 aarch64), `switch-dev` (libnx 4.12, deko3d 0.5, uam),
+  `switch-mesa` 20.1.0, `switch-glfw`, `switch-sdl2`, `switch-zlib`
+  instalados via pacman do msys2 (repositórios `[dkp-libs]`/`[dkp-windows]`
+  já presentes no `pacman.conf`). `dkp-pacman` não existe aqui — usar o
+  `pacman.exe` do msys2.
 
 ## 2. Clonar a base do fork (referência)
 
@@ -30,12 +33,25 @@ git clone --recurse-submodules https://github.com/jpd002/Play-.git
 
 ## 3. Configurar e compilar (target Switch)
 
+No bash do msys2 (`C:\devkitPro\msys2`), com caminhos relativos (o cmake
+do msys2 embaralha caminho Windows absoluto com espaço):
+
 ```
-mkdir build-switch && cd build-switch
-cmake -DCMAKE_TOOLCHAIN_FILE="${DEVKITPRO}/cmake/Switch.cmake" \
-      -DBUILD_TESTS:BOOL=OFF -DENABLE_AMAZON_S3:BOOL=OFF ..
-make Play_Switch_nro -j$(nproc)
+cd ps2-switch
+cmake -S upstream/play-switch -B build-xerpi -G 'Unix Makefiles' \
+  -DCMAKE_TOOLCHAIN_FILE=/opt/devkitpro/cmake/Switch.cmake \
+  -DBUILD_TESTS:BOOL=OFF -DENABLE_AMAZON_S3:BOOL=OFF \
+  -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_DEPENDS_USE_COMPILER=FALSE
+make -C build-xerpi Play_Switch_nro -j$(nproc)
 ```
+
+Flags obrigatórias (descobertas no build de 18/09/2026):
+- `CMAKE_POLICY_VERSION_MINIMUM=3.5`: submódulo xxHash antigo seria
+  rejeitado pelo CMake novo.
+- `CMAKE_DEPENDS_USE_COMPILER=FALSE`: depfiles com `C:/...` quebram o
+  make ("múltiplos padrões para o alvo").
+- Build 100% verificado: `Play_Switch.nro` (3,2 MB). Só warnings
+  pré-existentes do upstream.
 
 Saída: `Source/ui_switch/Play_Switch.nro` → copiar para `/switch/` do SD.
 BIOS (dump próprio): pasta documentada na UI do fork.

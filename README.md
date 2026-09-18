@@ -7,8 +7,11 @@ forem portáveis. Base jogável, não milagre.
 
 ## Estado real (18/09/2026)
 
-- O port Switch do Play! (ref. `xerpi/play-switch`) é **prova de conceito**:
-  sem texturing, só polígonos coloridos básicos.
+- **MARCO: `Play_Switch.nro` (3,2 MB) compilado com sucesso nesta máquina**
+  a partir do `xerpi/play-switch` (devkitA64 gcc 16.1, libnx 4.12,
+  deko3d 0.5, mesa 20.1). Receita exata em `docs/BUILD.md`.
+- O port segue **prova de conceito**: sem texturing, só polígonos
+  coloridos básicos (Fase 2).
 - Upstream PCSX2-ARM64 = só interpretador (+VIF dynarec). JIT ARM64 de
   verdade hoje está no fork **ARMSX2** (EE/IOP/VU + fastmem) — mas ele é
   amarrado à arquitetura do PCSX2 e **não é transplantável** para o Play!.
