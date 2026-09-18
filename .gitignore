@@ -1,6 +1,7 @@
 # Build
 build-*/
 build-switch/
+dist/
 *.o
 *.a
 *.nro

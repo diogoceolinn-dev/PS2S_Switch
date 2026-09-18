@@ -1,5 +1,8 @@
 # PS2 Switch — Emulador de PS2 para Nintendo Switch (Tegra X1)
 
+**Versão atual: v0.2.0-fase2** — NRO com texturing (`dist/`, ver
+`docs/RELEASE-v0.2.0.md`).
+
 Fork do **Play! port Switch (`xerpi/play-switch`)** com foco em estabilidade
 e desempenho no Tegra X1, com rebase periódico do núcleo
 **`jpd002/Play-`** e técnicas avaliadas do **ARMSX2/PCSX2-ARM64** onde
