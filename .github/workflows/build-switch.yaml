@@ -1,6 +1,7 @@
 name: build-switch
 
-# Compila o NRO do Switch a cada push/PR (padrão inspirado no port de referência).
+# Compila o NRO do Switch a cada push/PR:
+# clona o port base (pinado), aplica o overlay fork/ (Fase 2) e compila.
 on:
   push:
     branches: [main]
@@ -12,29 +13,41 @@ jobs:
     container:
       image: devkitpro/devkita64:latest
     steps:
-      - name: Checkout (com submodules do upstream)
+      - name: Checkout do projeto (overlay + docs + CI)
         uses: actions/checkout@v4
         with:
-          submodules: recursive
+          path: ps2-switch
+
+      - name: Clonar base (xerpi/play-switch pinado + submodules)
+        run: |
+          git clone --recurse-submodules https://github.com/xerpi/play-switch.git upstream/play-switch
+          git -C upstream/play-switch checkout d9c9e42e
+          git -C upstream/play-switch submodule update --init --recursive
+
+      - name: Aplicar overlay Fase 2
+        run: |
+          sh ps2-switch/scripts/apply-fork.sh upstream/play-switch
 
       - name: Instalar pacotes Switch
         run: |
           dkp-pacman -Syu --noconfirm
-          dkp-pacman -S --noconfirm switch-dev switch-mesa switch-glfw switch-sdl2
+          dkp-pacman -S --noconfirm switch-dev switch-mesa switch-glfw switch-sdl2 switch-zlib
 
       - name: Configurar (CMake, toolchain Switch)
         run: |
-          mkdir build-switch && cd build-switch
-          cmake -DCMAKE_TOOLCHAIN_FILE="${DEVKITPRO}/cmake/Switch.cmake" \
-            -DBUILD_TESTS:BOOL=OFF -DENABLE_AMAZON_S3:BOOL=OFF ..
+          cmake -S upstream/play-switch -B build \
+            -G 'Unix Makefiles' \
+            -DCMAKE_TOOLCHAIN_FILE="${DEVKITPRO}/cmake/Switch.cmake" \
+            -DBUILD_TESTS:BOOL=OFF -DENABLE_AMAZON_S3:BOOL=OFF \
+            -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+            -DCMAKE_DEPENDS_USE_COMPILER=FALSE
 
       - name: Compilar NRO
         run: |
-          cd build-switch
-          make Play_Switch_nro -j$(nproc)
+          make -C build Play_Switch_nro -j$(nproc)
 
       - name: Publicar artefato
         uses: actions/upload-artifact@v4
         with:
           name: Play_Switch
-          path: build-switch/Source/ui_switch/Play_Switch.nro
+          path: build/Source/ui_switch/Play_Switch.nro
