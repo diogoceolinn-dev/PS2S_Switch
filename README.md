@@ -1,8 +1,9 @@
 # PS2 Switch — Emulador de PS2 para Nintendo Switch (Tegra X1)
 
-Fork do **Play! (jpd002/Play-)** com foco em estabilidade e desempenho no
-Tegra X1, incorporando técnicas avaliadas do **ARMSX2/PCSX2-ARM64** onde
-forem portáveis. Interpretation honest: base jogável, não milagre.
+Fork do **Play! port Switch (`xerpi/play-switch`)** com foco em estabilidade
+e desempenho no Tegra X1, com rebase periódico do núcleo
+**`jpd002/Play-`** e técnicas avaliadas do **ARMSX2/PCSX2-ARM64** onde
+forem portáveis. Base jogável, não milagre.
 
 ## Estado real (18/09/2026)
 

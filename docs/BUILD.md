@@ -13,15 +13,20 @@
   aarch64). Falta configurar o `dkp-pacman`/repositórios devkitPro e
   instalar os pacotes acima — ver `scripts/windows-setup.bat`.
 
-## 2. Clonar o upstream (referência)
+## 2. Clonar a base do fork (referência)
+
+O fork nasce do port Switch (único com `ui_switch`):
+
+```
+git clone --recurse-submodules https://github.com/xerpi/play-switch.git
+cd play-switch
+```
+
+Núcleo upstream (fonte de rebase, sem target Switch):
 
 ```
 git clone --recurse-submodules https://github.com/jpd002/Play-.git
-cd Play-
 ```
-
-O fork deste projeto nasce daqui. **Antes de publicar o fork, confira o
-arquivo LICENSE do upstream** e mantenha os avisos de copyright.
 
 ## 3. Configurar e compilar (target Switch)
 

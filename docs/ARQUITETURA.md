@@ -1,11 +1,17 @@
 # Arquitetura — PS2 Switch (Tegra X1)
 
-## 1. Base: fork do Play!, não merge com PCSX2
+## 1. Base: fork do port Switch (xerpi), rebase do núcleo (jpd002)
 
-`jpd002/Play-` (C++, portátil: Windows/macOS/UNIX/Android/iOS/web) já tem
-target Switch: `cmake -DCMAKE_TOOLCHAIN_FILE="${DEVKITPRO}/cmake/Switch.cmake"`
-+ `make Play_Switch_nro` (`Source/ui_switch/`). Referência do port:
-`xerpi/play-switch` (PoC, sem texturing).
+O trabalho nasce como fork de **`xerpi/play-switch`** — o único com target
+Switch (`Source/ui_switch/` com `main.cpp`, build
+`cmake -DCMAKE_TOOLCHAIN_FILE="${DEVKITPRO}/cmake/Switch.cmake"` +
+`make Play_Switch_nro`). O upstream **`jpd002/Play-` não tem `ui_switch`**;
+ele entra como fonte de rebase do núcleo (EE/IOP/VU/GS).
+
+Baselines pinadas em `upstream/` (18/09/2026, com submódulos):
+- `play-switch` (xerpi) @ `d9c9e42e` — base do fork.
+- `Play-` (jpd002) @ `83700b2c` — referência p/ rebase.
+- Licença BSD (Jean-Philip Desjardins): manter avisos de copyright no fork.
 
 Por que não "juntar as duas bases" literalmente: PCSX2/ARMSX2 e Play! têm
 arquiteturas incompatíveis (PCSX2 = núcleo pluginado x86 com 20 anos de
