@@ -1,0 +1,24 @@
+# Template de perfil por jogo — copiar para gamesdb/perfis/<ID>.yaml
+# Todos os campos são opcionais; o emulador usa o padrão quando ausente.
+
+id_jogo: "SLUS-00000"          # código do disco
+titulo: "TEMPLATE - nao usar como dado real"
+
+video:
+  resolucao_interna: 1.0       # 1.0 = nativo PS2; Tegra X1: manter 1.0 na Fase 2-3
+  frameskip: 0                 # 0 = desligado; 1-2 só com evidência de ganho
+  vsync: true
+
+cpu:
+  ee_underclock: 100            # %; reduzir só se medido (ex.: 75)
+  idle_skip: true               # pular busy-poll (ganho típico em menus/loadings)
+
+audio:
+  backend: audren
+  taxa: 48000
+  buffer_ms: 64                # subir se houver crackle (latência x estabilidade)
+
+memoria:
+  limite_cache_texturas_mb: 512  # teto dentro dos 4 GB do Switch
+
+notas: "Template. Apagar este arquivo ao criar o primeiro perfil real."

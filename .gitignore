@@ -1,0 +1,24 @@
+# Build
+build-*/
+build-switch/
+*.o
+*.a
+*.nro
+*.nso
+*.elf
+*.dksh
+*.o.d
+
+# Upstream de referência (clone local, não versionar)
+upstream/
+
+# Toolchain / IDE
+.vscode/
+.idea/
+*.user
+cmake-build-*/
+
+# Logs e temporários
+*.log
+.DS_Store
+Thumbs.db

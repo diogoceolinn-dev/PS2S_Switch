@@ -1,0 +1,40 @@
+name: build-switch
+
+# Compila o NRO do Switch a cada push/PR (padrão inspirado no port de referência).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  nro:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkita64:latest
+    steps:
+      - name: Checkout (com submodules do upstream)
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Instalar pacotes Switch
+        run: |
+          dkp-pacman -Syu --noconfirm
+          dkp-pacman -S --noconfirm switch-dev switch-mesa switch-glfw switch-sdl2
+
+      - name: Configurar (CMake, toolchain Switch)
+        run: |
+          mkdir build-switch && cd build-switch
+          cmake -DCMAKE_TOOLCHAIN_FILE="${DEVKITPRO}/cmake/Switch.cmake" \
+            -DBUILD_TESTS:BOOL=OFF -DENABLE_AMAZON_S3:BOOL=OFF ..
+
+      - name: Compilar NRO
+        run: |
+          cd build-switch
+          make Play_Switch_nro -j$(nproc)
+
+      - name: Publicar artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: Play_Switch
+          path: build-switch/Source/ui_switch/Play_Switch.nro

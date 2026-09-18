@@ -1,0 +1,21 @@
+# gamesdb — compatibilidade e perfis (medidos no hardware)
+# Estados: nothing | menus | ingame | playable
+# "playable" exige: 60/50 fps estáveis + áudio sem crackle + jogável do
+# início ao fim do primeiro estágio, com evidência (log/foto/vídeo).
+# NÃO inventar entradas: sem evidência, não entra.
+
+schema_version: 1
+medido_em:
+  - "Switch Erista (docked/handheld)"
+  - "Switch Mariko (docked/handheld)"
+
+jogos: []
+# Exemplo de entrada real (preencher após teste):
+# - id: "SLUS-12345"
+#   titulo: "Nome do Jogo"
+#   estado: ingame
+#   modo: handheld
+#   perfil: perfis/acao-30fps.yaml
+#   fps_medio: 28
+#   evidencia: "docs/evidencias/SLUS-12345-01.jpg"
+#   notas: "Queda no mapa X; sem textura na fase Y"
