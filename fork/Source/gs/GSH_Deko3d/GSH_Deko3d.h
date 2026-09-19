@@ -30,6 +30,9 @@ public:
 	void TexCache_Flush();
 	void TexCache_CollectGarbage(DkQueue queue, bool force = false);
 
+	// Fase 2.1: recria a swapchain após dock/undock (a antiga é invalidada).
+	void HandleOperationModeChanged();
+
 private:
 	//These need to match the layout of the shader's uniform block
 	struct VERTEXPARAMS

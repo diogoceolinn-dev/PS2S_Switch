@@ -33,6 +33,24 @@
 		        msg);                   \
 	} while(0)
 
+// Fase 2.1: foco/suspensão e dock/undock via hooks (padrão dos samples).
+static volatile bool g_focused = true;
+static volatile bool g_modeChanged = false;
+static AppletHookCookie g_hookCookie;
+
+static void applet_hook(AppletHookType hook, void* param)
+{
+	(void)param;
+	if(hook == AppletHookType_OnFocusState)
+	{
+		g_focused = (appletGetFocusState() == AppletFocusState_InFocus);
+	}
+	else if(hook == AppletHookType_OnOperationMode)
+	{
+		g_modeChanged = true;
+	}
+}
+
 static bool IsBootableExecutablePath(const fs::path& filePath)
 {
 	auto extension = filePath.extension().string();
@@ -53,6 +71,7 @@ int main(int argc, char** argv)
 {
 	CPS2VM* m_virtualMachine = nullptr;
 	bool executionOver = false;
+	bool vmPaused = false;
 	const char* file;
 	fs::path filePath;
 	PadState pad;
@@ -78,6 +97,8 @@ int main(int argc, char** argv)
 	padConfigureInput(1, HidNpadStyleSet_NpadStandard);
 	padInitializeDefault(&pad);
 	BOOTLOG("pad ok");
+
+	appletHook(&g_hookCookie, applet_hook, NULL);
 
 	fprintf(stderr, "Play! " PLAY_VERSION "\n");
 	fprintf(stderr, "argc: %d\n", argc);
@@ -164,6 +185,35 @@ int main(int argc, char** argv)
 		unsigned int loopCount = 0;
 		while(appletMainLoop() && !executionOver)
 		{
+			// Fase 2.1: dock/undock invalida a swapchain — recria antes de desenhar.
+			if(g_modeChanged)
+			{
+				g_modeChanged = false;
+				auto gsHandler = static_cast<CGSH_Deko3d*>(m_virtualMachine->GetGSHandler());
+				if(gsHandler != nullptr)
+				{
+					fprintf(stderr, "[boot] dock/undock detectado\n");
+					gsHandler->HandleOperationModeChanged();
+				}
+			}
+			// Fase 2.1: sem foco (HOME/sleep) não submete nada; pausa a VM.
+			if(!g_focused)
+			{
+				if(!vmPaused)
+				{
+					fprintf(stderr, "[boot] sem foco: pausando VM\n");
+					m_virtualMachine->Pause();
+					vmPaused = true;
+				}
+				svcSleepThread(100000000ULL);
+				continue;
+			}
+			if(vmPaused)
+			{
+				fprintf(stderr, "[boot] foco de volta: retomando VM\n");
+				m_virtualMachine->Resume();
+				vmPaused = false;
+			}
 			padUpdate(&pad);
 
 			u64 buttons = padGetButtons(&pad);
@@ -199,9 +249,15 @@ int main(int argc, char** argv)
 
 done:
 	fprintf(stderr, "Finish\n");
+	appletUnhook(&g_hookCookie);
 
 	if(m_virtualMachine)
 	{
+		if(vmPaused)
+		{
+			m_virtualMachine->Resume();
+			vmPaused = false;
+		}
 		m_virtualMachine->Pause();
 		m_virtualMachine->DestroyPadHandler();
 		m_virtualMachine->DestroyGSHandler();

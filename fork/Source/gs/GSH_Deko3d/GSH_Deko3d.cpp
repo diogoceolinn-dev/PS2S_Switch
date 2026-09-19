@@ -309,6 +309,23 @@ void CGSH_Deko3d::ReleaseImpl()
 	dkDeviceDestroy(g_device);
 }
 
+// Fase 2.1: dock/undock invalida a swapchain. Recria sobre os mesmos
+// framebuffers (as listas de bind referenciam as IMAGENS, que seguem válidas).
+void CGSH_Deko3d::HandleOperationModeChanged()
+{
+	dkQueueWaitIdle(g_renderQueue);
+	dkSwapchainDestroy(g_swapchain);
+	DkImage const* swapchainImages[FB_NUM];
+	for(unsigned i = 0; i < FB_NUM; i++)
+	{
+		swapchainImages[i] = &g_framebuffers[i];
+	}
+	DkSwapchainMaker swapchainMaker;
+	dkSwapchainMakerDefaults(&swapchainMaker, g_device, nwindowGetDefault(), swapchainImages, FB_NUM);
+	g_swapchain = dkSwapchainCreate(&swapchainMaker);
+	fprintf(stderr, "[boot] swapchain recriada (dock/undock)\n");
+}
+
 void CGSH_Deko3d::BeginFrame()
 {
 	// Declare structs that will be used for binding state
