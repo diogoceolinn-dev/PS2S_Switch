@@ -20,6 +20,7 @@
 #include "GSH_Deko3d.h"
 
 #include "PS2VM_Preferences.h"
+#include "ElfGuard.h"
 
 #define DEFAULT_FILE "/switch/Play/test.elf"
 
@@ -145,6 +146,14 @@ int main(int argc, char** argv)
 		fprintf(stderr, "Starting execution...\n");
 		if(IsBootableExecutablePath(filePath))
 		{
+			// Fase 2.1: guarda anti-lixo/ISO antes do parser (vira saída
+			// limpa em vez de crash).
+			char guardErr[256];
+			if(!ElfGuard_Check(file, guardErr, sizeof(guardErr)))
+			{
+				fprintf(stderr, "[boot] ELF rejeitado: %s\n", guardErr);
+				goto done;
+			}
 			fprintf(stderr, "[boot] BootFromFile...\n");
 			m_virtualMachine->m_ee->m_os->BootFromFile(filePath);
 		}

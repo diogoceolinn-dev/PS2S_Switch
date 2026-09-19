@@ -27,6 +27,7 @@
 #include "GSH_Deko3d.h"
 
 #include "PS2VM_Preferences.h"
+#include "ElfGuard.h"
 
 #define DEFAULT_FILE "/switch/Play/test.elf"
 #define EXIT_COMBO (HidNpadButton_Plus | HidNpadButton_R)
@@ -195,7 +196,16 @@ int main(int argc, char** argv)
 	}
 	present_color(1.0f, 0.0f, 1.0f, 120); // MAGENTA
 
-	/* ESTÁGIO boot do arquivo (test.elf pode não existir = cinza, normal). */
+	/* ESTÁGIO boot do arquivo. Guarda anti-lixo/ISO antes do parser. */
+	{
+		char guardErr[256];
+		if(!ElfGuard_Check(DEFAULT_FILE, guardErr, sizeof(guardErr)))
+		{
+			fprintf(stderr, "[boot] ELF rejeitado: %s\n", guardErr);
+			present_color(0.5f, 0.5f, 0.5f, 600); // CINZA = arquivo ruim/ausente
+			return 1;
+		}
+	}
 	try
 	{
 		vm->m_ee->m_os->BootFromFile(DEFAULT_FILE);
