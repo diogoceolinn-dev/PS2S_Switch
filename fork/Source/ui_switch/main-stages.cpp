@@ -173,10 +173,19 @@ int main(int argc, char** argv)
 	}
 	present_color(0.0f, 1.0f, 1.0f, 120); // CIANO
 
-	/* ESTÁGIO handlers (pad + GS/deko3d init real). */
+	/* ESTÁGIO handlers: pad primeiro (ROSA), depois GS/deko3d (MAGENTA). */
 	try
 	{
 		vm->CreatePadHandler(CPH_Generic::GetFactoryFunction());
+	}
+	catch(...)
+	{
+		present_color(0.5f, 0.5f, 0.5f, 600);
+		return 1;
+	}
+	present_color(1.0f, 0.0f, 0.5f, 120); // ROSA = pad ok, falta GS
+	try
+	{
 		vm->CreateGSHandler(CGSH_Deko3d::GetFactoryFunction());
 	}
 	catch(...)
