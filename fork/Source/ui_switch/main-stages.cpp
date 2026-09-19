@@ -196,7 +196,21 @@ int main(int argc, char** argv)
 	}
 	present_color(1.0f, 0.0f, 1.0f, 120); // MAGENTA
 
+	/* DIAG: arquivo vazio /switch/Play/STAGES_NOBOOT pula boot+Resume
+	 * (arco-íris direto). Separa "parse do ELF" de "execução". */
+	bool skipBoot = false;
+	{
+		FILE* flagFile = fopen("/switch/Play/STAGES_NOBOOT", "rb");
+		if(flagFile != nullptr)
+		{
+			fclose(flagFile);
+			skipBoot = true;
+			fprintf(stderr, "[boot] STAGES_NOBOOT: pulando boot+Resume\n");
+		}
+	}
+
 	/* ESTÁGIO boot do arquivo. Guarda anti-lixo/ISO antes do parser. */
+	if(!skipBoot)
 	{
 		char guardErr[256];
 		if(!ElfGuard_Check(DEFAULT_FILE, guardErr, sizeof(guardErr)))
@@ -208,7 +222,10 @@ int main(int argc, char** argv)
 	}
 	try
 	{
-		vm->m_ee->m_os->BootFromFile(DEFAULT_FILE);
+		if(!skipBoot)
+		{
+			vm->m_ee->m_os->BootFromFile(DEFAULT_FILE);
+		}
 	}
 	catch(...)
 	{
@@ -218,7 +235,10 @@ int main(int argc, char** argv)
 	present_color(1.0f, 1.0f, 1.0f, 120); // BRANCO = boot tentado
 
 	/* Vivo: arco-íris + PLUS sai. */
-	vm->Resume();
+	if(!skipBoot)
+	{
+		vm->Resume();
+	}
 	unsigned frame = 0;
 	while(appletMainLoop())
 	{
