@@ -68,6 +68,10 @@ static DkShader g_fragmentShader;
 // Fase 2: fragment shader texturizado.
 static DkShader g_fragmentTexShader;
 
+// DIAG-Fase2: zera = init mínimo (sem texfsh, sem binds de descritores,
+// runs texturizados viram cor chapada). Serve para isolar o crash no init.
+#define FASE2_DIAG_MINIMAL_INIT 1
+
 static DkMemBlock g_bindFbCmdbufMemBlock;
 static DkCmdBuf g_bindFbCmdbuf;
 static DkCmdList g_cmdsBindFramebuffer[FB_NUM];
@@ -195,8 +199,10 @@ void CGSH_Deko3d::InitializeImpl()
 	// Load our shaders (both vertex and fragment)
 	loadShaderMemory(&g_vertexShader, &_binary_triangle_vsh_dksh_start, (uintptr_t)&_binary_triangle_vsh_dksh_end - (uintptr_t)&_binary_triangle_vsh_dksh_start);
 	loadShaderMemory(&g_fragmentShader, &_binary_color_fsh_dksh_start, (uintptr_t)&_binary_color_fsh_dksh_end - (uintptr_t)&_binary_color_fsh_dksh_start);
+#if !FASE2_DIAG_MINIMAL_INIT
 	// Fase 2: shader de textura (modulate).
 	loadShaderMemory(&g_fragmentTexShader, &_binary_texture_fsh_dksh_start, (uintptr_t)&_binary_texture_fsh_dksh_end - (uintptr_t)&_binary_texture_fsh_dksh_start);
+#endif
 
 	// Fase 2: blocos de descritores (imagem: 1 slot por run; sampler: 2 fixos).
 	dkMemBlockMakerDefaults(&memBlockMaker, g_device, TEX_IMG_SLOTS * DK_IMAGE_DESCRIPTOR_ALIGNMENT);
@@ -378,8 +384,10 @@ void CGSH_Deko3d::BeginFrame()
 
 	// Fase 2: sets de descritores (imagem + sampler) válidos o frame todo;
 	// o conteúdo dos slots de imagem é preenchido por draw run.
+#if !FASE2_DIAG_MINIMAL_INIT
 	dkCmdBufBindImageDescriptorSet(g_cmdbuf, dkMemBlockGetGpuAddr(g_imgDescBlock), TEX_IMG_SLOTS);
 	dkCmdBufBindSamplerDescriptorSet(g_cmdbuf, dkMemBlockGetGpuAddr(g_sampDescBlock), 2);
+#endif
 
 	// Fase 2: coleta de texturas evictadas (só trava a GPU se passar do teto).
 	TexCache_CollectGarbage(g_renderQueue, false);
@@ -402,7 +410,12 @@ void CGSH_Deko3d::EndFrame()
 	for(const auto& run : m_runs)
 	{
 		if(run.vertexCount == 0) continue;
+#if !FASE2_DIAG_MINIMAL_INIT
 		if(run.textured && (run.texture != nullptr) && run.texture->imageReady)
+#else
+		// DIAG: tudo vira cor chapada (sem binds de descritores nesta build).
+		if(false)
+#endif
 		{
 			if(m_texSlotCursor < TEX_IMG_SLOTS)
 			{
